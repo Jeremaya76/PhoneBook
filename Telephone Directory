@@ -1,0 +1,320 @@
+package ListTele;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class TelephoneDirectory {
+
+    public static int showIndex() {
+        // Initialization of index i
+        int i = 1;
+
+        try {
+            // Create an object for the CSV file
+            File myObj = new File("Phone_Book.csv");
+            // Create an object to read the CSV
+            Scanner myReader = new Scanner(myObj);
+
+            // Loop to read each line
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                System.out.println("No. " + i + " " + data);
+                i++;
+            }
+            myReader.close();
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Error\n");
+        }
+        return i;
+    }
+
+    public static void main(String[] args) {
+        // Instantiate scanner to receive global input, close flag to stop do-while
+        Scanner myScanner = new Scanner(System.in);
+        boolean close = true;
+
+        // Check if the file exists; if not, create one
+        try {
+            File myFile = new File("Phone_Book.csv");
+            if (myFile.createNewFile()) {
+                System.out.println("File created: " + myFile.getName() + ", Created at: " + myFile.getAbsolutePath());
+            }
+            
+        } catch (Exception e) {
+            System.out.println("File not found\n");
+        }   
+        
+        System.out.println("Welcome to the phone book");
+        
+        do {
+            ////////Menu\\\\\\\\
+            System.out.println("\n! Press 1 to add ! Press 2 to delete ! Press 3 to modify " +
+            "! Press 4 to search ! Press 5 to view ! Press 6 to exit !");
+
+            // Read user input
+            String userInput = myScanner.nextLine();
+
+            switch (userInput) {
+                case "1":
+
+                    System.out.println("Add\n");
+
+                    // Prompt and receive input for name, number, email
+                    System.out.println("Name:");
+                    String userInput01 = myScanner.nextLine();
+                    System.out.println("Number:");
+                    // Temporarily store null value until confirmation
+                    String userInput02 = "";
+                    
+                    // Check if input is a number and not a letter
+                    if (myScanner.hasNextInt()) {
+                        userInput02 = myScanner.nextLine(); 
+                    }
+                    else {
+                        System.out.println("Please enter a number");
+                    }
+        
+                    System.out.println("Email:");
+                    String userInput03 = myScanner.nextLine();
+
+                    // If fields are not empty
+                    if (!userInput01.isEmpty() && !userInput02.isEmpty() && !userInput03.isEmpty()) {
+                        try {             
+                            // Check if data already exists in the file
+                            File myObj = new File("Phone_Book.csv");
+                            Scanner myReader = new Scanner(myObj);
+                            boolean alreadyExists = false;
+            
+                            while (myReader.hasNextLine()) {
+                                String data = myReader.nextLine();
+                                String[] elements = data.split(",");
+                                if (elements[0].equals(userInput01) && elements[1].equals(userInput02) && elements[2].equals(userInput03)) {
+                                    alreadyExists = true;
+                                    break;
+                                }
+                            }
+                            myReader.close();
+            
+                            if (alreadyExists) {
+                                System.out.println("This contact already exists in the list. Please try again.");
+                                break;
+                            } else {
+                                // Tip from ChatGPT, use true to avoid overwriting the file
+                                FileWriter myWriter = new FileWriter("Phone_Book.csv", true);
+                                // System.getProperty works for different OS
+                                myWriter.write(System.getProperty("line.separator") + userInput01 + ", " + userInput02 + ", " + userInput03);
+
+                                myWriter.close();
+
+                                System.out.println("\nText added: " + userInput01 + ", " + userInput02 + ", " + userInput03);
+                            }
+
+                            } catch (IOException e) {
+                            System.err.println("Error\n");
+                        }
+                        
+                    }
+                    else 
+                        System.out.println("Please fill in the fields correctly");
+                    
+                    break;
+
+                case "2":
+                    System.out.println("Delete\n");
+                    // Call show index method
+                    TelephoneDirectory.showIndex();
+
+                    System.out.println("\nChoose the line number to delete");
+
+                    // Check if next input is an int
+                    if (myScanner.hasNextInt()) {
+                        // Instantiate input to avoid writing "myScanner.nextInt()" repeatedly
+                        int userInput04 = myScanner.nextInt();
+                        // Skip line to avoid going to default case
+                        myScanner.nextLine();
+                        // Reference value returned from the method
+                        int i = TelephoneDirectory.showIndex();
+                        
+                        // If within index range
+                        if (userInput04 <= i) {
+                            try {
+                                // Create a temporary file for transcription
+                                File inputFile = new File("Phone_Book.csv");
+                                File tempFile = new File("temp.csv");
+                            
+                                Scanner fileScanner = new Scanner(inputFile);
+                                FileWriter writer = new FileWriter(tempFile);
+                                
+                                int lineNumber = 1;
+                
+                                while (fileScanner.hasNextLine()) {
+                                    String line = fileScanner.nextLine();
+
+                                    if (lineNumber != userInput04) {
+                                        writer.write(line + System.getProperty("line.separator"));
+                                    }
+                                    else {
+                                        System.out.println("Removed Text: " + line);
+                                    }
+                                    lineNumber++;
+                                }
+                
+                                fileScanner.close();
+                                writer.close();
+                                
+                                // Checks after deletion
+                                if (inputFile.delete()) {
+                                    if (!tempFile.renameTo(inputFile)) {
+                                        System.err.println("Error renaming temporary file.");
+                                    }
+                                } else {
+                                    System.err.println("Error deleting the original file.");
+                                }
+
+                            } catch (IOException ex) {
+                                System.err.println("Error processing the file.");
+                                ex.printStackTrace();
+                            }
+
+                        } else {
+                            System.out.println("Enter a valid number from the displayed index");
+                        }
+
+                    } else {
+                        System.out.println("Enter a valid number");
+                        // Skip line to avoid going to default case
+                        myScanner.nextLine();
+                    }
+                    break;
+                
+
+                case "3":
+                    System.out.println("Modify");
+
+                    TelephoneDirectory.showIndex();
+                    
+                    System.out.println("\nChoose the line number to modify");
+
+                if (myScanner.hasNextInt()) {
+                    int userInput04 = myScanner.nextInt();
+                    // Skip line to avoid going to default case
+                    myScanner.nextLine();
+
+                    int i = TelephoneDirectory.showIndex();
+
+                    // If within index range
+                    if (userInput04 <= i) {
+                        System.out.println("Modify line: " + userInput04);
+
+                        System.out.println("New Name:");
+                        String newName = myScanner.nextLine();
+                        System.out.println("New Number:");
+                        String newNumber = myScanner.nextLine();
+                        System.out.println("New Email:");
+                        String newEmail = myScanner.nextLine();
+                        
+                        // If fields are not empty
+                        if (!newName.isEmpty() && !newNumber.isEmpty() && !newEmail.isEmpty()) {
+                            try {
+                                File inputFile = new File("PhoneBook.csv");
+                                File tempFile = new File("temp.csv");
+
+                                Scanner fileScanner = new Scanner(inputFile);
+                                FileWriter writer = new FileWriter(tempFile);
+
+                                int currentLineNumber = 1;
+
+                                while (fileScanner.hasNextLine()) {
+                                    String line = fileScanner.nextLine();
+                                    if (currentLineNumber == userInput04) {
+                                        line = newName + ", " + newNumber + ", " + newEmail;
+                                    }
+                                    writer.write(line + System.getProperty("line.separator"));
+                                    currentLineNumber++;
+                                }
+
+                                fileScanner.close();
+                                writer.close();
+
+                                if (inputFile.delete()) {
+                                    if (!tempFile.renameTo(inputFile)) {
+                                        System.err.println("Error renaming temporary file.");
+                                    }
+                                } else {
+                                    System.err.println("Error deleting the original file.");
+                                }
+
+                                System.out.println("Line successfully modified.");
+
+                            } catch (IOException ex) {
+                                System.err.println("Error processing the file.");
+                                ex.printStackTrace();
+                            }
+                        } else {
+                            System.out.println("Please fill in the fields correctly");
+                        }
+                    } else {
+                        System.out.println("Enter a valid number from the displayed index");
+                    }
+                } else {
+                    System.out.println("Enter a valid number");
+                    myScanner.nextLine();
+                }
+                break;
+                
+                case "4":
+                    System.out.println("Search by Name, Number, or Email:");
+
+                    String searchTerm = myScanner.nextLine().toLowerCase();
+
+                    try {
+                        File myObj = new File("Phone_Book.csv");
+                        Scanner myReader = new Scanner(myObj);
+
+                        while (myReader.hasNextLine()) {
+                            String data = myReader.nextLine().toLowerCase();
+                            String[] elements = data.split(",");
+
+                            // Check if any of the elements contain the search term
+                            for (String element : elements) {
+                                if (element.contains(searchTerm)) {
+                                    // Display all information for the element
+                                    System.out.println("\nContact Information:");
+                                    System.out.println("Name: " + elements[0]);
+                                    System.out.println("Number: " + elements[1]);
+                                    System.out.println("Email: " + elements[2]);
+                                    System.out.println("----------------------");
+                                    break;  // Stop after finding a match
+                                }
+                            }
+                        }
+
+                        myReader.close();
+
+                    } catch (FileNotFoundException e) {
+                        System.err.println("Error reading file\n");
+                    }
+                    break;
+
+                case "5":
+                Consult.viewContacts();
+                break;
+                
+                case "6":
+                    System.out.println("Exit\n");                
+                    close = false;
+                    break;
+
+                default:
+                    System.out.println("Please choose an option from 1 to 5 next time");
+                    break;        
+            } 
+        } while (close);
+
+        myScanner.close();   
+    }
+}

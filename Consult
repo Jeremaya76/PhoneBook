@@ -1,0 +1,27 @@
+package ListTele;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class Consult {
+    public static void viewContacts() {
+        System.out.println("View Contacts");
+        try {
+            File myObj = new File("Phone_Book.csv");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                System.out.println(data);
+            }
+            myReader.close();
+
+        } catch (IOException e) {
+            System.err.println("Error\n");
+        }
+    }
+}
+
+
